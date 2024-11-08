@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"github.com/feedcast-io/feedcast.db/types"
 	"gorm.io/gorm"
 )
 
@@ -18,10 +19,10 @@ type FeedProduct struct {
 	BingStatus        int16
 	FacebookStatus    int16
 	FreeListingStatus int16
-	AvailabilityId    sql.NullInt16
-	ConditionId       sql.NullInt16
-	AgeGroupId        sql.NullInt16
-	GenderId          sql.NullInt16
+	AvailabilityId    types.Availability
+	ConditionId       types.ConditionType
+	AgeGroupId        types.AgeGroup
+	GenderId          types.Gender
 	Quantity          sql.NullInt32
 	Currency          *Currency
 	CurrencyId        sql.NullInt32
