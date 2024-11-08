@@ -2,7 +2,6 @@ package types
 
 import (
 	"encoding/xml"
-	"log"
 	"reflect"
 )
 
@@ -75,7 +74,6 @@ func (p *GoogleProduct) AppendCustomData() {
 					customValue, ok := d[tag].(string)
 					if ok && len(customValue) > 0 {
 						reflect.ValueOf(p).Elem().FieldByName(field.Name).SetString(customValue)
-						log.Printf("Replace field %s with value %s", field.Name, customValue)
 					}
 				}
 			}
