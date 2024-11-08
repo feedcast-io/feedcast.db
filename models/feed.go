@@ -174,6 +174,7 @@ func GetFeedAllProducts(conn *gorm.DB, feedId int32) (chan []FeedProduct, chan e
 				Preload("Feed").
 				Preload("Feed.Merchant").
 				Preload("Feed.Language").
+				Preload("Feed.Country").
 				Preload("Category").
 				Preload("Category.Texts").
 				Preload("ProductBrand").
