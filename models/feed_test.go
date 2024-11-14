@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	feedcast_database "github.com/feedcast-io/feedcast.db"
 	"github.com/feedcast-io/feedcast.db/types"
+	"slices"
 	"testing"
 	"time"
 )
@@ -115,5 +116,27 @@ func TestGetFeedAllProducts(t *testing.T) {
 
 	if 0 == found {
 		t.Error("no products found")
+	}
+}
+
+func TestGetFeedInvoicePackCodes(t *testing.T) {
+	conn := feedcast_database.GetConnection()
+	defer conn.Close()
+
+	var subItem SubscriptionItem
+	if e := conn.Gorm.Last(&subItem).Error; nil != e {
+		t.Error(e)
+	}
+
+	codes, e := GetFeedInvoicePackCodes(conn.Gorm, subItem.FeedId.Int32)
+	if e != nil {
+		t.Error(e)
+	}
+	if len(codes) == 0 {
+		t.Error("no code found")
+	}
+
+	if !slices.Contains(codes, types.InvoiceProductPackStarter) && !slices.Contains(codes, types.InvoiceProductPackPremium) {
+		t.Error("invalid pack codes")
 	}
 }

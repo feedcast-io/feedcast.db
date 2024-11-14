@@ -69,6 +69,24 @@ func (f *Feed) GetObjectByType(objectType enums.FeedObjects) *FeedObject {
 	return nil
 }
 
+func GetFeedInvoicePackCodes(conn *gorm.DB, feedId int32) ([]types.InvoiceProduct, error) {
+	var feed Feed
+	packs := make([]types.InvoiceProduct, 0)
+
+	e := conn.
+		Preload("SubscriptionItems").
+		Preload("SubscriptionItems.InvoicePackPrice").
+		Preload("SubscriptionItems.InvoicePackPrice.InvoicePack").
+		Find(&feed, feedId).
+		Error
+
+	for _, it := range feed.SubscriptionItems {
+		packs = append(packs, it.InvoicePackPrice.InvoicePack.Code)
+	}
+
+	return packs, e
+}
+
 func SaveFeedScore(conn *gorm.DB, feed *Feed, score *types.FeedScore) (*FeedScoreDate, error) {
 	var entity FeedScoreDate
 
