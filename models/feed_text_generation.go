@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"github.com/feedcast-io/feedcast.db/types"
 	"gorm.io/gorm"
 	"time"
@@ -12,6 +13,9 @@ type FeedTextGeneration struct {
 	Type            types.FeedTextGenerationTypes
 	Date            time.Time
 	NbTextGenerated int16
+	IsAuto          bool
+	FeedProduct     *FeedProduct
+	FeedProductId   sql.NullInt32
 }
 
 func CountFeedTextGeneration(conn *gorm.DB, feedId int32, from time.Time) (int64, error) {
