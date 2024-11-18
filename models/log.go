@@ -49,6 +49,10 @@ func AddFeedLog(conn *gorm.DB, logType types.LogTypes, feed *Feed, data map[stri
 		return nil, err
 	}
 
+	if nil == data {
+		data = datatypes.JSONMap{}
+	}
+
 	log := Log{
 		FeedId:         sql.NullInt32{feed.ID, true},
 		MerchantUserId: sql.NullInt32{merchantUser.ID, true},
