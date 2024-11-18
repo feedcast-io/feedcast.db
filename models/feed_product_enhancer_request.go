@@ -10,6 +10,6 @@ type FeedProductEnhancerRequest struct {
 	FeedId    int32
 	Feed      Feed
 	Pending   bool
-	Products  types.ArrayString
+	Products  types.ArrayOfScalar[int]
 	DeletedAt gorm.DeletedAt
 }
