@@ -1,6 +1,7 @@
 package models
 
 import (
+	"cmp"
 	"database/sql"
 	"github.com/feedcast-io/feedcast.db/enums"
 	"github.com/feedcast-io/feedcast.db/types"
@@ -88,92 +89,67 @@ func GetFeedInvoicePackCodes(conn *gorm.DB, feedId int32) ([]types.InvoiceProduc
 }
 
 func SaveFeedScore(conn *gorm.DB, feed *Feed, score *types.FeedScore) (*FeedScoreDate, error) {
-	var entity FeedScoreDate
-
-	date := time.Now()
-
-	err := conn.
-		Where("feed_id = ? AND date = ?", feed.ID, date.Format(time.DateOnly)).
-		Attrs(FeedScoreDate{
-			FeedId: feed.ID,
-			Date:   date,
-		}).FirstOrInit(&entity).
-		Error
-
-	if nil != err {
-		return nil, err
+	entity := FeedScoreDate{
+		FeedcastScore:    score.Feedcast,
+		GoogleScore:      score.Google,
+		BingScore:        score.Bing,
+		FreeListingScore: score.FreeListing,
+		MetaScore:        score.Meta,
 	}
+	var newFeed Feed
 
-	if score.Feedcast.Valid {
-		entity.FeedcastScore = score.Feedcast
-	}
-	if score.Google.Valid {
-		entity.GoogleScore = score.Google
-	}
-	if score.Bing.Valid {
-		entity.BingScore = score.Bing
-	}
-	if score.FreeListing.Valid {
-		entity.FreeListingScore = score.FreeListing
-	}
-	if score.Meta.Valid {
-		entity.MetaScore = score.Meta
-	}
+	now := time.Now()
 
-	if err := conn.Save(&entity).Error; nil != err {
-		return nil, err
-	}
+	e := cmp.Or(
+		conn.
+			Where("feed_id = ? AND date = ?", feed.ID, now.Format(time.DateOnly)).
+			Attrs(FeedScoreDate{
+				FeedId: feed.ID,
+				Date:   now,
+			}).
+			Assign(entity).
+			FirstOrCreate(&entity).
+			Error,
+		conn.Model(Feed{}).
+			Where("id = ?", feed.ID).
+			Assign(&Feed{
+				LastScoreId: sql.NullInt32{entity.ID, true},
+			}).
+			FirstOrCreate(&newFeed).
+			Error,
+	)
 
-	if feed.LastScoreId.Int32 != entity.ID {
-		feed.LastScoreId.Int32 = entity.ID
-		feed.LastScoreId.Valid = true
-
-		if err := conn.Select("last_score_id").Updates(&feed).Error; nil != err {
-			return nil, err
-		}
-	}
-
-	return &entity, nil
+	return &entity, e
 }
 
 func SaveFeedImport(conn *gorm.DB, feed *Feed, imported int32, startTime, endTime time.Time) (*FeedStatDate, error) {
-	var entity FeedStatDate
+	entity := FeedStatDate{
+		Imported:            sql.NullInt32{imported, true},
+		DateStartLastImport: sql.NullTime{startTime, true},
+		DateEndLastImport:   sql.NullTime{endTime, true},
+	}
 
 	date := time.Now()
 
-	err := conn.
-		Where("feed_id = ? AND date = ?", feed.ID, date.Format(time.DateOnly)).
-		Attrs(FeedStatDate{
-			FeedId:              feed.ID,
-			Date:                date,
-			Imported:            sql.NullInt32{Valid: true},
-			DateStartLastImport: sql.NullTime{Valid: true},
-			DateEndLastImport:   sql.NullTime{Valid: true},
-		}).FirstOrInit(&entity).
-		Error
+	e := cmp.Or(
+		conn.
+			Where("feed_id = ? AND date = ?", feed.ID, date.Format(time.DateOnly)).
+			Attrs(FeedStatDate{
+				FeedId: feed.ID,
+				Date:   date,
+			}).
+			Assign(entity).
+			FirstOrCreate(&entity).
+			Error,
+		conn.Where("id = ?", feed.ID).
+			Assign(&Feed{
+				LastStatId: sql.NullInt32{entity.ID, true},
+			}).
+			FirstOrCreate(feed).
+			Error,
+	)
 
-	if nil != err {
-		return nil, err
-	}
-
-	entity.Imported.Int32 = imported
-	entity.DateStartLastImport.Time = startTime
-	entity.DateEndLastImport.Time = endTime
-
-	if err := conn.Save(&entity).Error; nil != err {
-		return nil, err
-	}
-
-	if feed.LastStatId.Int32 != entity.ID {
-		feed.LastStatId.Int32 = entity.ID
-		feed.LastStatId.Valid = true
-
-		if err := conn.Select("last_stat_id").Updates(&feed).Error; nil != err {
-			return nil, err
-		}
-	}
-
-	return &entity, nil
+	return &entity, e
 }
 
 func GetFeedAllProducts(conn *gorm.DB, feedId int32) (chan []FeedProduct, chan error) {
