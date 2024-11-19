@@ -10,4 +10,5 @@ type ProductError struct {
 	Hash           sql.NullString `gorm:"size:32,unique"`
 	Attribute      sql.NullString `gorm:"size:32,unique"`
 	Code           sql.NullString `gorm:"size:255"`
+	ToDisplay      bool
 }
