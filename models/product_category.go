@@ -42,7 +42,7 @@ WITH RECURSIVE an AS (
 	FROM product_category pc
 	JOIN an ON an.parent_id = pc.id
 )
-SELECT google_id FROM an;
+SELECT id FROM an;
 `
 	conn.Raw(sql, googleCategoryId).Find(&ids)
 
