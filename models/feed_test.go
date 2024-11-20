@@ -56,14 +56,19 @@ func TestFeedOptions(t *testing.T) {
 
 	foundWithBlacklistedBrands := 0
 	for _, feed := range feeds {
-		val, _ := feed.Options["blacklisted_brand_title"]
-		if v, ok := val.(string); ok && len(v) > 0 {
+		if len(feed.Options.BlacklistedBrandTitle) > 0 {
 			foundWithBlacklistedBrands++
 		}
 	}
 
 	if 0 == foundWithBlacklistedBrands {
 		t.Error("blacklisted brands not found in feeds")
+	}
+
+	if e := conn.Gorm.
+		Where("LENGTH(options) < 4").
+		Find(&feeds).Error; nil != e {
+		t.Error(e)
 	}
 }
 
