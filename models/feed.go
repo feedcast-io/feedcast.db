@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"github.com/feedcast-io/feedcast.db/enums"
 	"github.com/feedcast-io/feedcast.db/types"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"time"
 )
@@ -52,7 +53,8 @@ type Feed struct {
 	FeedTask []FeedTask
 	Objects  []FeedObject
 
-	Option *FeedOption
+	Option  *FeedOption
+	Options datatypes.JSONMap
 }
 
 func (f *Feed) CanSynchro() bool {

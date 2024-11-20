@@ -38,6 +38,35 @@ func TestSaveFeedScore(t *testing.T) {
 	tx.Rollback()
 }
 
+func TestFeedOptions(t *testing.T) {
+	conn := feedcast_database.GetConnection()
+	defer conn.Close()
+
+	var feeds []Feed
+
+	if e := conn.Gorm.
+		Where("options like '%blacklisted_brand_title%'").
+		Find(&feeds).Error; nil != e {
+		t.Error(e)
+	}
+
+	if len(feeds) == 0 {
+		t.Error("no feeds found")
+	}
+
+	foundWithBlacklistedBrands := 0
+	for _, feed := range feeds {
+		val, _ := feed.Options["blacklisted_brand_title"]
+		if v, ok := val.(string); ok && len(v) > 0 {
+			foundWithBlacklistedBrands++
+		}
+	}
+
+	if 0 == foundWithBlacklistedBrands {
+		t.Error("blacklisted brands not found in feeds")
+	}
+}
+
 func TestUpdateFeedScore(t *testing.T) {
 	conn := feedcast_database.GetConnection()
 	defer conn.Close()
