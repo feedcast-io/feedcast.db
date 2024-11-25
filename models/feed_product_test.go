@@ -24,6 +24,7 @@ func TestFeedProduct_ToGoogleProduct(t *testing.T) {
 		Preload("CustomData").
 		Joins("INNER JOIN feed_product_custom_data ON feed_product.id = feed_product_custom_data.feed_product_id AND LENGTH(feed_product_custom_data.data) > 10").
 		Limit(1000).
+		Where("reference_id > 0").
 		Last(&products).Error; e != nil {
 		t.Error(e)
 	}
