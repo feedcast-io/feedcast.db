@@ -108,7 +108,7 @@ func TestGetFeedAllProducts(t *testing.T) {
 	var batch []FeedProduct
 	var found int32
 
-	ch, e := GetFeedAllProducts(conn.Gorm, 10956)
+	ch, e := GetFeedAllProducts(conn.Gorm, 11938)
 
 	for ok1, ok2 := true, true; ok1 || ok2; {
 		select {

@@ -184,13 +184,13 @@ func GetFeedAllProducts(conn *gorm.DB, feedId int32) (chan []FeedProduct, chan e
 				err <- e
 			}
 
-			if foundInBatch := len(products); foundInBatch > 0 {
+			if foundInBatch := len(products); foundInBatch >= 0 {
 				ch <- products
-				startId = products[foundInBatch-1].ID
 
 				if foundInBatch != batchSize {
 					break
 				}
+				startId = products[foundInBatch-1].ID
 			}
 		}
 
