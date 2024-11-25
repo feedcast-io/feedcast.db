@@ -177,7 +177,7 @@ func GetFeedAllProducts(conn *gorm.DB, feedId int32) (chan []FeedProduct, chan e
 				Preload("Currency").
 				Preload("Various").
 				Preload("Url").
-				Where("feed_id = ? AND id > ?", feedId, startId).
+				Where("feed_id = ? AND id > ? AND reference_id > 0", feedId, startId).
 				Order("id ASC").
 				Limit(batchSize).
 				Find(&products).Error; nil != e {
