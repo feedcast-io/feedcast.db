@@ -6,6 +6,8 @@ import (
 	"github.com/feedcast-io/feedcast.db/enums"
 	"github.com/feedcast-io/feedcast.db/types"
 	"gorm.io/gorm"
+	"math/rand/v2"
+	"slices"
 	"time"
 )
 
@@ -199,4 +201,57 @@ func GetFeedAllProducts(conn *gorm.DB, feedId int32) (chan []FeedProduct, chan e
 	}(500)
 
 	return ch, err
+}
+
+func GetFeedTaskToDo(conn *gorm.DB, taskType types.FeedTasks, maxLastLaunch time.Time) (int32, error) {
+	var feeds []int32
+
+	if err := conn.
+		Model(Feed{}).
+		Select("feed.id").
+		Joins("LEFT JOIN feed_task ON feed.id = feed_task.feed_id AND feed_task.type = ?", taskType).
+		Where("feed_task.last_launch IS NULL").
+		Limit(100).
+		Scan(&feeds).Error; nil != err {
+		return 0, err
+	}
+
+	if 0 == len(feeds) {
+		if err := conn.
+			Model(Feed{}).
+			Select("feed.id").
+			Joins("JOIN feed_task ON feed.id = feed_task.feed_id AND feed_task.type = ?", taskType).
+			Where("feed_task.last_launch < ?", maxLastLaunch).
+			Order("feed_task.last_launch").
+			Limit(10).
+			Scan(&feeds).Error; nil != err {
+			return 0, err
+		}
+	}
+
+	var feedTask FeedTask
+
+	if len(feeds) > 0 {
+		slices.SortFunc(feeds, func(a, b int32) int {
+			odd := 1 == rand.Int()%2
+			if odd {
+				return -1 * rand.Int()
+			} else {
+				return rand.Int()
+			}
+		})
+		if err := conn.
+			Where(FeedTask{
+				FeedId: feeds[0],
+				Type:   taskType,
+			}).
+			Assign(FeedTask{LastLaunch: time.Now()}).
+			FirstOrCreate(&feedTask).Error; nil != err {
+			return 0, err
+		}
+
+		return feeds[0], nil
+	}
+
+	return 0, nil
 }
