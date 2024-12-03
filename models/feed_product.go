@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 	"regexp"
 	"sort"
+	"strings"
 )
 
 type FeedProduct struct {
@@ -174,4 +175,29 @@ func (from *FeedProduct) ToGoogleProduct() (*types.GoogleProduct, error) {
 	}
 
 	return p, nil
+}
+
+// Return feed products ID from feedID & array of references as map with lowered-case references as key
+func GetFeedProductsByReferences(conn *gorm.DB, feedId int32, references []string) (map[string]int32, error) {
+	var raw []struct {
+		Id        int32  `db:"id"`
+		Reference string `db:"reference"`
+	}
+
+	if e := conn.Model(&FeedProduct{}).
+		Select("feed_product.id, fpr.reference").
+		Joins("INNER JOIN feed_product_reference fpr on feed_product.reference_id = fpr.id").
+		Where("feed_product.feed_id = ? AND fpr.reference IN ?", feedId, references).
+		Find(&raw).
+		Error; nil != e {
+		return nil, e
+	}
+
+	result := make(map[string]int32)
+
+	for _, id := range raw {
+		result[strings.ToLower(id.Reference)] = id.Id
+	}
+
+	return result, nil
 }

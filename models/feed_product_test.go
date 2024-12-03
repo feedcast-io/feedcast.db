@@ -79,3 +79,40 @@ func TestFeedProduct_ToGoogleProduct(t *testing.T) {
 		}
 	}
 }
+
+func TestGetFeedProductsByReferences(t *testing.T) {
+	conn := feedcast_database.GetConnection()
+	defer conn.Close()
+	var products []FeedProduct
+
+	references := make([]string, 0)
+
+	if e := conn.Gorm.
+		Preload("Reference").
+		Where(&FeedProduct{FeedId: 10956}).
+		Limit(20).
+		Find(&products).Error; e != nil {
+		t.Error(e)
+	}
+
+	if 0 == len(products) {
+		t.Error("no products found")
+	}
+
+	for _, product := range products {
+		references = append(references, product.Reference.Reference)
+	}
+
+	mapping, err := GetFeedProductsByReferences(conn.Gorm, 10956, references)
+	if nil != err {
+		t.Error(err)
+	}
+
+	for _, p := range products {
+		if productId, ok := mapping[strings.ToLower(p.Reference.Reference)]; !ok {
+			t.Error("product not found from reference")
+		} else if productId != p.ID {
+			t.Error("product id doesn't match from reference")
+		}
+	}
+}
