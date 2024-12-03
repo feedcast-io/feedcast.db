@@ -174,3 +174,16 @@ func TestGetFeedInvoicePackCodes(t *testing.T) {
 		t.Error("invalid pack codes")
 	}
 }
+
+func TestGetFeedTaskToDo(t *testing.T) {
+	conn := feedcast_database.GetConnection()
+	defer conn.Close()
+
+	feed, err := GetFeedTaskToDo(conn.Gorm, types.FeedTaskDownload, time.Now().Add(time.Hour*-6))
+
+	if err != nil {
+		t.Error(err)
+	} else if feed < 1 {
+		t.Error("invalid feed id, should be > 0")
+	}
+}
