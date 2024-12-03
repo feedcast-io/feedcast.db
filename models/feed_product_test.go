@@ -115,4 +115,22 @@ func TestGetFeedProductsByReferences(t *testing.T) {
 			t.Error("product id doesn't match from reference")
 		}
 	}
+
+	badReferences := []string{"zlajppzb", "zouzous", "рб010", "рс011"}
+	mapping, err = GetFeedProductsByReferences(conn.Gorm, 10956, badReferences)
+	if nil != err {
+		t.Error(err)
+	}
+
+	if expected := len(badReferences); expected != len(mapping) {
+		t.Errorf("mapping reference should have %d entries", expected)
+	}
+
+	for _, ref := range badReferences {
+		if id, ok := mapping[strings.ToLower(ref)]; !ok {
+			t.Error("reference not found from reference")
+		} else if id > 0 {
+			t.Error("product id should not exists from bad reference")
+		}
+	}
 }

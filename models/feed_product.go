@@ -184,10 +184,10 @@ func GetFeedProductsByReferences(conn *gorm.DB, feedId int32, references []strin
 		Reference string `db:"reference"`
 	}
 
-	if e := conn.Model(&FeedProduct{}).
-		Select("feed_product.id, fpr.reference").
-		Joins("INNER JOIN feed_product_reference fpr on feed_product.reference_id = fpr.id").
-		Where("feed_product.feed_id = ? AND fpr.reference IN ?", feedId, references).
+	if e := conn.Model(&FeedProductReference{}).
+		Select("fp.id, feed_product_reference.reference").
+		Joins("LEFT JOIN feed_product fp on feed_product_reference.id = fp.reference_id AND fp.feed_id = ?", feedId).
+		Where("feed_product_reference.reference IN ?", references).
 		Find(&raw).
 		Error; nil != e {
 		return nil, e
