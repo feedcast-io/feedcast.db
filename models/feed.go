@@ -280,3 +280,28 @@ func GetFeedProductLimit(conn *gorm.DB, feedId, defaultLimit int32) int32 {
 
 	return defaultLimit
 }
+
+func GetFeedCategoryMapping(conn *gorm.DB, feedId int32) (map[string]MerchantCategoryMapping, error) {
+	var mappings []MerchantCategoryMapping
+
+	result := make(map[string]MerchantCategoryMapping)
+
+	err := conn.
+		Preload("Category").
+		Where(MerchantCategoryMapping{
+			FeedId: feedId,
+		}).
+		Find(&mappings).Error
+
+	if nil != err {
+		return result, err
+	}
+
+	for _, mapping := range mappings {
+		if nil != mapping.Category {
+			result[mapping.OriginalValue] = mapping
+		}
+	}
+
+	return result, nil
+}

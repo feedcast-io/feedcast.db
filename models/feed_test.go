@@ -187,3 +187,15 @@ func TestGetFeedTaskToDo(t *testing.T) {
 		t.Error("invalid feed id, should be > 0")
 	}
 }
+
+func TestGetFeedCategoryMapping(t *testing.T) {
+	conn := feedcast_database.GetConnection()
+	defer conn.Close()
+
+	mapping, err := GetFeedCategoryMapping(conn.Gorm, 10956)
+	if err != nil {
+		t.Error(err)
+	} else if len(mapping) == 0 {
+		t.Error("no mapping found")
+	}
+}
