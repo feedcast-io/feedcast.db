@@ -1,4 +1,4 @@
-package enums
+package types
 
 type FeedObjects int16
 

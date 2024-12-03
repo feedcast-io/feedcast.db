@@ -1,4 +1,4 @@
-package enums
+package types
 
 type FeedSynchroStatus int16
 

@@ -3,7 +3,6 @@ package models
 import (
 	"cmp"
 	"database/sql"
-	"github.com/feedcast-io/feedcast.db/enums"
 	"github.com/feedcast-io/feedcast.db/types"
 	"gorm.io/gorm"
 	"math/rand/v2"
@@ -20,7 +19,7 @@ type Feed struct {
 	Url           sql.NullString
 	Source        int16
 	ItemLimit     sql.NullInt32
-	SynchroStatus enums.FeedSynchroStatus
+	SynchroStatus types.FeedSynchroStatus
 
 	Language   *Language
 	LanguageId sql.NullInt32
@@ -59,11 +58,11 @@ type Feed struct {
 }
 
 func (f *Feed) CanSynchro() bool {
-	return f.SynchroStatus == enums.FeedSynchroStatusAlways ||
-		f.SynchroStatus == enums.FeedSynchroStatusOnSubscription && f.CurrentSubscriptionId.Valid
+	return f.SynchroStatus == types.FeedSynchroStatusAlways ||
+		f.SynchroStatus == types.FeedSynchroStatusOnSubscription && f.CurrentSubscriptionId.Valid
 }
 
-func (f *Feed) GetObjectByType(objectType enums.FeedObjects) *FeedObject {
+func (f *Feed) GetObjectByType(objectType types.FeedObjects) *FeedObject {
 	for _, obj := range f.Objects {
 		if obj.Type == objectType {
 			return &obj
