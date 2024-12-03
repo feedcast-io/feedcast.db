@@ -256,3 +256,27 @@ func GetFeedTaskToDo(conn *gorm.DB, taskType types.FeedTasks, maxLastLaunch time
 
 	return 0, nil
 }
+
+func GetFeedProductLimit(conn *gorm.DB, feedId, defaultLimit int32) int32 {
+	var feed Feed
+
+	conn.
+		Preload("SubscriptionItems").
+		Preload("SubscriptionItems.InvoicePackPrice").
+		Preload("SubscriptionItems.InvoicePackPrice.InvoicePack").
+		Limit(1).
+		Where(feedId).
+		Find(&feed)
+
+	if feed.ItemLimit.Valid {
+		defaultLimit = feed.ItemLimit.Int32
+	}
+
+	for _, item := range feed.SubscriptionItems {
+		if item.InvoicePackPrice.InvoicePack.MaxProducts > defaultLimit {
+			defaultLimit = item.InvoicePackPrice.InvoicePack.MaxProducts
+		}
+	}
+
+	return defaultLimit
+}
