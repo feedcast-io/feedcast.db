@@ -305,3 +305,21 @@ func GetFeedCategoryMapping(conn *gorm.DB, feedId int32) (map[string]MerchantCat
 
 	return result, nil
 }
+
+func SaveFeedCategoryMapping(conn *gorm.DB, feed *Feed, category, hash string, categoryId int32) (MerchantCategoryMapping, error) {
+	var entity MerchantCategoryMapping
+	err := conn.
+		Where(MerchantCategoryMapping{
+			Hash:   hash,
+			FeedId: feed.ID,
+		}).
+		Attrs(MerchantCategoryMapping{
+			OriginalValue: category,
+			MerchantId:    feed.MerchantId,
+			CategoryId:    sql.NullInt32{Int32: categoryId, Valid: true},
+			IsAuto:        true,
+		}).
+		FirstOrCreate(&entity).Error
+
+	return entity, err
+}
