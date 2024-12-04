@@ -98,7 +98,6 @@ func SaveFeedScore(conn *gorm.DB, feed *Feed, score *types.FeedScore) (*FeedScor
 		FreeListingScore: score.FreeListing,
 		MetaScore:        score.Meta,
 	}
-	var newFeed Feed
 
 	now := time.Now()
 
@@ -112,12 +111,8 @@ func SaveFeedScore(conn *gorm.DB, feed *Feed, score *types.FeedScore) (*FeedScor
 			Assign(entity).
 			FirstOrCreate(&entity).
 			Error,
-		conn.Model(Feed{}).
-			Where("id = ?", feed.ID).
-			Assign(&Feed{
-				LastScoreId: sql.NullInt32{entity.ID, true},
-			}).
-			FirstOrCreate(&newFeed).
+		conn.Model(feed).
+			Update("last_score_id", entity.ID).
 			Error,
 	)
 
@@ -143,11 +138,8 @@ func SaveFeedImport(conn *gorm.DB, feed *Feed, imported int32, startTime, endTim
 			Assign(entity).
 			FirstOrCreate(&entity).
 			Error,
-		conn.Where("id = ?", feed.ID).
-			Assign(&Feed{
-				LastStatId: sql.NullInt32{entity.ID, true},
-			}).
-			FirstOrCreate(feed).
+		conn.Model(feed).
+			Update("last_stat_id", entity.ID).
 			Error,
 	)
 
