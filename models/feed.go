@@ -111,7 +111,8 @@ func SaveFeedScore(conn *gorm.DB, feed *Feed, score *types.FeedScore) (*FeedScor
 			Assign(entity).
 			FirstOrCreate(&entity).
 			Error,
-		conn.Model(feed).
+		conn.Model(&Feed{}).
+			Where("id = ?", feed.ID).
 			Update("last_score_id", entity.ID).
 			Error,
 	)
@@ -138,7 +139,8 @@ func SaveFeedImport(conn *gorm.DB, feed *Feed, imported int32, startTime, endTim
 			Assign(entity).
 			FirstOrCreate(&entity).
 			Error,
-		conn.Model(feed).
+		conn.Model(&Feed{}).
+			Where("id = ?", feed.ID).
 			Update("last_stat_id", entity.ID).
 			Error,
 	)

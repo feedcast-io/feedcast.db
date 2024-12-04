@@ -77,7 +77,7 @@ func TestUpdateFeedScore(t *testing.T) {
 	defer conn.Close()
 
 	var feed Feed
-	conn.Gorm.Last(&feed)
+	conn.Gorm.Find(&feed, 10956)
 
 	tx := conn.Gorm.Begin()
 	fsd, err := SaveFeedImport(tx, &feed, 4567, time.Now().Add(time.Hour), time.Now())
