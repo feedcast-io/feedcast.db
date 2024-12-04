@@ -111,7 +111,7 @@ func TestGetFeedProductsByReferences(t *testing.T) {
 	for _, p := range products {
 		if productId, ok := mapping[strings.ToLower(p.Reference.Reference)]; !ok {
 			t.Error("product not found from reference")
-		} else if productId != p.ID {
+		} else if productId.FeedProductId != p.ID {
 			t.Error("product id doesn't match from reference")
 		}
 	}
@@ -129,7 +129,7 @@ func TestGetFeedProductsByReferences(t *testing.T) {
 	for _, ref := range badReferences {
 		if id, ok := mapping[strings.ToLower(ref)]; !ok {
 			t.Error("reference not found from reference")
-		} else if id > 0 {
+		} else if id.FeedProductId > 0 {
 			t.Error("product id should not exists from bad reference")
 		}
 	}

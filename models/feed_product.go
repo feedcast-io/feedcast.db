@@ -178,26 +178,28 @@ func (from *FeedProduct) ToGoogleProduct() (*types.GoogleProduct, error) {
 }
 
 // Return feed products ID from feedID & array of references as map with lowered-case references as key
-func GetFeedProductsByReferences(conn *gorm.DB, feedId int32, references []string) (map[string]int32, error) {
-	var raw []struct {
-		Id        int32  `db:"id"`
-		Reference string `db:"reference"`
+func GetFeedProductsByReferences(conn *gorm.DB, feedId int32, references []string) (map[string]types.FeedProductIdentifier, error) {
+	sql := `
+SELECT
+    fp.id AS feed_product_id, fpr.id AS reference_id, fpr.reference, fpt.id AS text_id, fpu.id AS url_id,
+    fps.id AS shipping_id, fpv.id AS various_id
+FROM
+    feed_product_reference fpr
+    LEFT JOIN feed_product fp ON (fp.reference_id = fpr.id AND fp.feed_id = ?)
+    LEFT JOIN feed_product_text fpt ON fp.id = fpt.feed_product_id
+    LEFT JOIN feed_product_url fpu ON fp.id = fpu.feed_product_id
+    LEFT JOIN feed_product_shipping fps ON fp.id = fps.feed_product_id
+    LEFT JOIN feed_product_various fpv ON fp.id = fpv.feed_product_id
+WHERE
+    fpr.reference IN ?`
+
+	var rows []types.FeedProductIdentifier
+	result := make(map[string]types.FeedProductIdentifier)
+	res := conn.Unscoped().Raw(sql, feedId, references).Scan(&rows)
+
+	for _, row := range rows {
+		result[strings.ToLower(row.Reference)] = row
 	}
 
-	if e := conn.Model(&FeedProductReference{}).
-		Select("fp.id, feed_product_reference.reference").
-		Joins("LEFT JOIN feed_product fp on feed_product_reference.id = fp.reference_id AND fp.feed_id = ?", feedId).
-		Where("feed_product_reference.reference IN ?", references).
-		Find(&raw).
-		Error; nil != e {
-		return nil, e
-	}
-
-	result := make(map[string]int32)
-
-	for _, id := range raw {
-		result[strings.ToLower(id.Reference)] = id.Id
-	}
-
-	return result, nil
+	return result, res.Error
 }
