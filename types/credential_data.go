@@ -8,11 +8,12 @@ import (
 )
 
 type CredentialData struct {
-	ApiKey       string `json:"api_key"`
-	RefreshToken string `json:"refresh_token"`
-	AccessToken  string `json:"access_token"`
-	CustomerId   string `json:"customer_id"`
-	Expiration   string `json:"expiration"`
+	ApiKey       string `json:"api_key,omitempty"`
+	RefreshToken string `json:"refresh_token,omitempty"`
+	AccessToken  string `json:"access_token,omitempty"`
+	CustomerId   string `json:"customer_id,omitempty"`
+	Expiration   string `json:"expiration,omitempty"`
+	Store        string `json:"store,omitempty"`
 }
 
 func (r *CredentialData) Value() (driver.Value, error) {
