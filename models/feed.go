@@ -17,7 +17,7 @@ type Feed struct {
 	MerchantId    int32
 	Name          sql.NullString `gorm:"type:text"`
 	Url           sql.NullString
-	Source        int16
+	Source        types.FeedSources
 	ItemLimit     sql.NullInt32
 	SynchroStatus types.FeedSynchroStatus
 
