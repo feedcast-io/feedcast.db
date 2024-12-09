@@ -23,6 +23,7 @@ type Merchant struct {
 	HasInvoicePayment bool
 	DefaultLanguage   string
 	HearAboutUs       sql.NullInt16
+	IsSpamSuspicion   sql.NullBool
 }
 
 func (m *Merchant) IsDirectCustomer() bool {
