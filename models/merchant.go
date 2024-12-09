@@ -2,7 +2,6 @@ package models
 
 import (
 	"database/sql"
-	"github.com/feedcast-io/feedcast.db/types"
 	"gorm.io/gorm"
 	"time"
 )
@@ -23,7 +22,7 @@ type Merchant struct {
 	StripeCustomerId  sql.NullString `gorm:"size:32"`
 	HasInvoicePayment bool
 	DefaultLanguage   string
-	HearAboutUs       types.MerchantHearAboutUsType
+	HearAboutUs       sql.NullInt16
 }
 
 func (m *Merchant) IsDirectCustomer() bool {
