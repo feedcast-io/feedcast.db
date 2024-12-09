@@ -57,7 +57,7 @@ func TestFeedOptions(t *testing.T) {
 
 	foundWithBlacklistedBrands := 0
 	for _, feed := range feeds {
-		if len(feed.Option.BlacklistedBrandTitle) > 0 {
+		if feed.Option.BlacklistedBrandTitle.Valid {
 			foundWithBlacklistedBrands++
 		}
 	}
