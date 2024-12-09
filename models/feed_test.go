@@ -45,7 +45,8 @@ func TestFeedOptions(t *testing.T) {
 	var feeds []Feed
 
 	if e := conn.Gorm.
-		Where("options like '%blacklisted_brand_title%'").
+		Preload("Option").
+		Joins("INNER JOIN feed_option fo ON feed.id = fo.feed_id AND blacklisted_brand_title IS NOT NULL").
 		Find(&feeds).Error; nil != e {
 		t.Error(e)
 	}
@@ -56,7 +57,7 @@ func TestFeedOptions(t *testing.T) {
 
 	foundWithBlacklistedBrands := 0
 	for _, feed := range feeds {
-		if len(feed.Options.BlacklistedBrandTitle) > 0 {
+		if len(feed.Option.BlacklistedBrandTitle) > 0 {
 			foundWithBlacklistedBrands++
 		}
 	}

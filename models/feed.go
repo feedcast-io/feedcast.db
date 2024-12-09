@@ -56,8 +56,7 @@ type Feed struct {
 	FeedTask []FeedTask
 	Objects  []FeedObject
 
-	Option  *FeedOption
-	Options types.FeedOptionMap
+	Option *FeedOption
 }
 
 func (f *Feed) CanSynchro() bool {
