@@ -3,6 +3,7 @@ package models
 import (
 	"cmp"
 	"database/sql"
+	"errors"
 	"github.com/feedcast-io/feedcast.db/types"
 	"gorm.io/gorm"
 	"math/rand/v2"
@@ -251,6 +252,53 @@ func GetFeedTaskToDo(conn *gorm.DB, taskType types.FeedTasks, maxLastLaunch time
 	}
 
 	return 0, nil
+}
+
+func GetFeedToDownload(conn *gorm.DB, maxLastLaunch time.Time) (int32, error) {
+	var feed Feed
+
+	err := conn.
+		Select("feed.id").
+		Joins("INNER JOIN merchant ON merchant.id = feed.merchant_id AND merchant.deleted_at IS NULL").
+		Joins("LEFT JOIN feed_task ON feed_task.feed_id = feed.id AND feed_task.type = ?", types.FeedTaskDownload).
+		Where("(feed.url != '' OR feed.source_credential_id IS NOT NULL) AND feed_task.id IS NULL").
+		Order("feed.id DESC").
+		FirstOrInit(&feed).Error
+
+	if nil != err {
+		return 0, err
+	}
+
+	if 0 == feed.ID {
+		if err := conn.
+			Select("feed.id").
+			Joins("INNER JOIN merchant ON merchant.id = feed.merchant_id AND merchant.deleted_at IS NULL").
+			Joins("INNER JOIN feed_task ON feed_task.feed_id = feed.id AND feed_task.type = ?", types.FeedTaskDownload).
+			Where("(feed.url != '' OR feed.source_credential_id IS NOT NULL) AND feed_task.last_launch < ?", maxLastLaunch).
+			Order("feed_task.last_launch").
+			FirstOrInit(&feed).Error; nil != err {
+			return 0, err
+		}
+	}
+
+	if 0 == feed.ID {
+		return 0, errors.New("No feed ID to download")
+	}
+
+	var task FeedTask
+	conn.
+		Where(FeedTask{
+			FeedId: feed.ID,
+			Type:   types.FeedTaskDownload,
+		}).
+		Attrs().
+		FirstOrInit(&task)
+
+	task.LastLaunch = time.Now()
+
+	err = conn.Save(&task).Error
+
+	return feed.ID, err
 }
 
 func GetFeedProductLimit(conn *gorm.DB, feedId, defaultLimit int32) int32 {
