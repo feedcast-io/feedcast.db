@@ -21,6 +21,9 @@ type Feed struct {
 	ItemLimit     sql.NullInt32
 	SynchroStatus types.FeedSynchroStatus
 
+	Project   *Project
+	ProjectId sql.NullInt32
+
 	Language   *Language
 	LanguageId sql.NullInt32
 
