@@ -2,7 +2,7 @@ package models
 
 import (
 	"database/sql"
-	"github.com/feedcast-io/feedcast.db/types"
+	"gorm.io/datatypes"
 )
 
 type Country struct {
@@ -12,7 +12,7 @@ type Country struct {
 	Zone              sql.NullString `gorm:"size:16"`
 	PhonePrefix       sql.NullString `gorm:"size:16"`
 	Vats              *[]CountryVat
-	Timezones         types.ArrayString
+	Timezones         datatypes.JSONSlice[string]
 	DefaultCurrency   *Currency
 	DefaultCurrencyId sql.NullInt32
 }

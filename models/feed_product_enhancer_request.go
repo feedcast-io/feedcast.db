@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/feedcast-io/feedcast.db/types"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -10,6 +10,6 @@ type FeedProductEnhancerRequest struct {
 	FeedId    int32
 	Feed      Feed
 	Pending   bool
-	Products  types.ArrayOfScalar[int]
+	Products  datatypes.JSONSlice[int]
 	DeletedAt gorm.DeletedAt
 }
