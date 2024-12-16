@@ -14,4 +14,5 @@ const (
 	FeedImportAccountMetrics
 	// Import old account metrics
 	FeedImportAccountMetricsOld
+	FeedTaskFeedSynchro
 )
