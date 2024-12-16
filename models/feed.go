@@ -219,7 +219,7 @@ func GetFeedTaskToDo(conn *gorm.DB, taskType types.FeedTasks, maxLastLaunch time
 			Select("feed.id").
 			Joins("INNER JOIN merchant ON merchant.id = feed.merchant_id AND merchant.deleted_at IS NULL").
 			Joins("JOIN feed_task ON feed.id = feed_task.feed_id AND feed_task.type = ?", taskType).
-			Where("feed.delete_at IS NULL AND feed_task.last_launch < ?", maxLastLaunch).
+			Where("feed.deleted_at IS NULL AND feed_task.last_launch < ?", maxLastLaunch).
 			Order("feed_task.last_launch").
 			Limit(10).
 			Scan(&feeds).Error; nil != err {
