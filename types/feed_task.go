@@ -15,4 +15,5 @@ const (
 	// Import old account metrics
 	FeedImportAccountMetricsOld
 	FeedTaskFeedSynchro
+	FeedTaskImportShoppingPrices = 11
 )
